@@ -21,6 +21,7 @@ up: ## Dockerコンテナを起動
 	docker compose up -d
 	@echo "✅ アプリケーションが起動しました"
 	@echo "🌐 アプリケーション: http://localhost:18088"
+	@echo "🌐 ネットワークアクセス: http://[サーバーIP]:18088"
 	@echo "📊 phpMyAdmin: http://localhost:18081"
 	@echo "🗄️  MySQL: localhost:13307 (ユーザー: stamp_user, パスワード: stamp_pass)"
 	@echo "⚡ Vite開発サーバー: http://localhost:15173"
@@ -85,7 +86,7 @@ seed: ## シーダーを実行
 	docker compose exec app php artisan db:seed
 	@echo "✅ シーダーを実行しました"
 
-fresh: migrate-fresh seed ## マイグレーション リフレッシュ + シーダー実行
+fresh: clean-db ## データベース完全リフレッシュ + シーダー実行
 
 key-generate: ## アプリケーションキーを生成
 	docker compose exec app php artisan key:generate

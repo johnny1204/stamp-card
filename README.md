@@ -41,6 +41,17 @@ cd stamp
 cp .env.example .env
 ```
 
+**ネットワーク内他端末からアクセスする場合の追加設定：**
+
+`.env`ファイルで以下を設定：
+```env
+# サーバーのIPアドレスに変更（例：192.168.1.100）
+APP_URL=http://[サーバーIP]:18088
+
+# Vite HMR設定（開発時のホットリロード用）
+VITE_HMR_HOST=[サーバーIP]
+```
+
 ### 3. Docker環境の起動
 
 #### Makeコマンドを使用する場合（推奨）
@@ -77,6 +88,7 @@ docker compose exec app php artisan migrate:fresh --seed
 セットアップ完了後、以下のURLにアクセスできます：
 
 - **アプリケーション**: http://localhost:18088
+- **ネットワーク内他端末から**: http://[サーバーIP]:18088
 - **phpMyAdmin**: http://localhost:18081
 - **Vite開発サーバー**: http://localhost:15173
 
@@ -182,6 +194,12 @@ make setup
 - 18081（phpMyAdmin）
 - 13307（MySQL）
 - 15173（Vite）
+
+### ネットワーク内他端末からアクセスできない場合
+
+1. サーバーのファイアウォール設定を確認
+2. ポート18088が開いているか確認
+3. サーバーのIPアドレスを確認：`ip addr show` または `ifconfig`
 
 ## 📁 プロジェクト構成
 

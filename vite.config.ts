@@ -14,11 +14,14 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
-        host: '0.0.0.0',
-        port: 5173,
+        host: process.env.VITE_HOST || '0.0.0.0',
+        port: parseInt(process.env.VITE_PORT || '5173'),
         strictPort: true,
         cors: true,
-        origin: 'http://localhost:15173'
+        hmr: {
+            host: process.env.VITE_HMR_HOST || 'localhost',
+            port: parseInt(process.env.VITE_HMR_PORT || '15173')
+        }
     },
     build: {
         rollupOptions: {
