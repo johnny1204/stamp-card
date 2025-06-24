@@ -160,7 +160,7 @@ backup-db: ## データベースをバックアップ
 # セットアップ関連
 # ==============================================================================
 
-setup: up install key-generate create-sqlite fix-permissions migrate seed ## 初回セットアップ（推奨）
+setup: up install key-generate create-sqlite fix-permissions fresh ## 初回セットアップ（推奨）
 	@echo ""
 	@echo "🎉 セットアップが完了しました！"
 	@echo ""
