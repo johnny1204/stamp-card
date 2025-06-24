@@ -97,20 +97,11 @@ const PokemonModal: React.FC<PokemonModalProps> = ({ isOpen, pokemon, childName,
                     }, 300);
                 }
                 
-                // 音声の読み込みと再生（キャッシュ付き）
+                // 音声の読み込み（自動再生は無効化、手動再生のみ）
                 loadCry().then(cryUrl => {
                     if (audioRef.current) {
                         audioRef.current.src = cryUrl;
                         audioRef.current.load();
-                        
-                        const playAudio = () => {
-                            audioRef.current?.play().catch(() => {
-                                // 音声再生に失敗した場合は無視
-                            });
-                        };
-                        
-                        // 音声が読み込まれたら再生
-                        audioRef.current.addEventListener('canplaythrough', playAudio, { once: true });
                     }
                 }).catch(error => {
                     console.error('鳴き声の読み込みに失敗:', error);
@@ -330,15 +321,38 @@ const PokemonModal: React.FC<PokemonModalProps> = ({ isOpen, pokemon, childName,
                     {/* アクションボタン */}
                     <div className="space-y-3">
                         <button
-                            onClick={async () => {
+                            onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                
                                 if (audioRef.current) {
                                     try {
+                                        // 音声を停止してリセット
+                                        audioRef.current.pause();
+                                        audioRef.current.currentTime = 0;
+                                        
+                                        // 鳴き声URLを取得
                                         const cryUrl = await loadCry();
                                         audioRef.current.src = cryUrl;
-                                        audioRef.current.currentTime = 0;
-                                        await audioRef.current.play();
+                                        
+                                        // 音声を再読み込み
+                                        audioRef.current.load();
+                                        
+                                        // 少し待ってから再生（スマホでの再生成功率向上）
+                                        setTimeout(async () => {
+                                            try {
+                                                await audioRef.current?.play();
+                                                console.log('鳴き声再生成功');
+                                            } catch (playError) {
+                                                console.error('鳴き声再生エラー:', playError);
+                                                // スマホで再生できない場合はアラートで通知
+                                                alert('音声の再生に失敗しました。ブラウザの設定で音声が有効になっているか確認してください。');
+                                            }
+                                        }, 100);
+                                        
                                     } catch (error) {
-                                        console.error('鳴き声再生エラー:', error);
+                                        console.error('鳴き声読み込みエラー:', error);
+                                        alert('音声ファイルの読み込みに失敗しました。');
                                     }
                                 }
                             }}
@@ -392,7 +406,10 @@ const PokemonModal: React.FC<PokemonModalProps> = ({ isOpen, pokemon, childName,
             {/* 音声要素 */}
             <audio
                 ref={audioRef}
-                preload="auto"
+                preload="metadata"
+                playsInline
+                muted={false}
+                controls={false}
             />
         </div>
     );
