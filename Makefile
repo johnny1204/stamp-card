@@ -70,7 +70,7 @@ mysql: ## MySQLコンテナにログイン
 
 install: ## 依存関係をインストール
 	docker compose exec app composer install
-	docker compose exec app npm install
+	docker compose exec node npm install
 	@echo "✅ 依存関係をインストールしました"
 
 migrate: ## マイグレーションを実行
@@ -122,19 +122,19 @@ test-watch: ## テストをwatch モードで実行
 # ==============================================================================
 
 dev: ## 開発サーバーを起動（Vite）
-	docker compose exec app npm run dev
+	docker compose exec node npm run dev
 
 build-assets: ## アセットをビルド
-	docker compose exec app npm run build
+	docker compose exec node npm run build
 
 watch: ## アセットをwatch モードでビルド
-	docker compose exec app npm run dev
+	docker compose exec node npm run dev
 
 lint: ## コードをLint
-	docker compose exec app npm run lint
+	docker compose exec node npm run lint
 
 typecheck: ## TypeScriptの型チェック
-	docker compose exec app npm run type-check
+	docker compose exec node npm run type-check
 
 # ==============================================================================
 # データベース関連
@@ -143,6 +143,14 @@ typecheck: ## TypeScriptの型チェック
 db-reset: ## データベースをリセット（マイグレーション + シーダー）
 	docker compose exec app php artisan migrate:fresh --seed
 	@echo "✅ データベースをリセットしました"
+
+clean-db: ## データベースを完全クリーンアップ
+	docker compose exec mysql mysql -u root -proot_password -e "DROP DATABASE IF EXISTS stamp_master; CREATE DATABASE stamp_master;"
+	docker compose exec app rm -f storage/database/database.sqlite
+	docker compose exec app mkdir -p storage/database
+	docker compose exec app touch storage/database/database.sqlite
+	docker compose exec app php artisan migrate:fresh --seed
+	@echo "✅ データベースを完全クリーンアップしました"
 
 backup-db: ## データベースをバックアップ
 	docker compose exec mysql mysqldump -u root -p stamp_master > backup_$(shell date +%Y%m%d_%H%M%S).sql
@@ -206,7 +214,7 @@ health: ## ヘルスチェック
 # ==============================================================================
 
 prod-build: ## プロダクション用ビルド
-	docker compose exec app npm run build
+	docker compose exec node npm run build
 	docker compose exec app php artisan config:cache
 	docker compose exec app php artisan route:cache
 	docker compose exec app php artisan view:cache
