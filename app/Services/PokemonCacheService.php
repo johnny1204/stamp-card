@@ -106,7 +106,8 @@ class PokemonCacheService
      */
     private function getCachedFileUrl(string $cachePath): string
     {
-        return Storage::disk(self::DISK)->url($cachePath);
+        // 相対パスで返す（どのホストからアクセスしても正しく動作）
+        return '/storage/' . $cachePath;
     }
     
     /**
