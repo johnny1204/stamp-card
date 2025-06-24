@@ -160,7 +160,7 @@ backup-db: ## データベースをバックアップ
 # セットアップ関連
 # ==============================================================================
 
-setup: up install key-generate create-sqlite migrate seed ## 初回セットアップ（推奨）
+setup: up install key-generate create-sqlite fix-permissions migrate seed ## 初回セットアップ（推奨）
 	@echo ""
 	@echo "🎉 セットアップが完了しました！"
 	@echo ""
@@ -179,6 +179,11 @@ create-sqlite: ## SQLiteファイルを作成
 	docker compose exec app mkdir -p storage/database
 	docker compose exec app touch storage/database/database.sqlite
 	@echo "✅ SQLiteファイルを作成しました"
+
+fix-permissions: ## storageディレクトリの権限を修正
+	docker compose exec app chmod -R 775 storage bootstrap/cache
+	docker compose exec app chown -R www-data:www-data storage bootstrap/cache
+	@echo "✅ 権限を修正しました"
 
 # ==============================================================================
 # クリーンアップ
