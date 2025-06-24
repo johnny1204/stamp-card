@@ -56,6 +56,10 @@ Route::middleware('admin.auth')->group(function () {
 
     // 子ども管理ルート
     Route::resource('children', ChildController::class);
+    Route::get('children/{child}/qr-code', [ChildController::class, 'qrCode'])->name('children.qr-code');
+    Route::get('children/{child}/qr-code/{type}', [ChildController::class, 'singleQrCode'])->name('children.qr-code.single');
+    Route::get('children/{child}/qr-code/{type}/data', [ChildController::class, 'getQrCodeData'])->name('children.qr-code.data');
+    Route::get('children/{child}/qr-code/{type}/svg', [ChildController::class, 'getQrCodeSvg'])->name('children.qr-code.svg');
 
     // スタンプ管理ルート
     Route::prefix('children/{child}')->name('children.')->group(function () {

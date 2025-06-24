@@ -7,7 +7,9 @@ use App\Http\Resources\ChildResource;
 use App\Models\Child;
 use App\Services\ChildService;
 use App\Services\ChildUrlService;
+use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,7 +20,8 @@ class ChildController extends Controller
 {
     public function __construct(
         private ChildService $childService,
-        private ChildUrlService $childUrlService
+        private ChildUrlService $childUrlService,
+        private QrCodeService $qrCodeService
     ) {}
 
     /**
@@ -124,5 +127,97 @@ class ChildController extends Controller
 
         return redirect()->route('children.index')
             ->with('success', "{$name}を削除しました");
+    }
+
+    /**
+     * 子ども用QRコードを表示
+     *
+     * @param Child $child
+     * @return \Inertia\Response
+     */
+    public function qrCode(Child $child): Response
+    {
+        $qrCodes = $this->qrCodeService->generateAllQrCodes($child);
+        $childUrls = $this->childUrlService->generateAllUrls($child);
+
+        $qrCodeData = [];
+        foreach ($qrCodes as $type => $svg) {
+            $qrCodeData[] = [
+                'type' => $type,
+                'label' => $this->qrCodeService->getQrCodeLabel($type),
+                'svg' => $svg,
+                'url' => $childUrls[$type] ?? '',
+            ];
+        }
+
+        return Inertia::render('Children/QrCode', [
+            'child' => ChildResource::make($child),
+            'qrCodes' => $qrCodeData,
+        ]);
+    }
+
+    /**
+     * 単一のQRコードを表示
+     *
+     * @param Child $child
+     * @param string $type
+     * @return \Inertia\Response
+     */
+    public function singleQrCode(Child $child, string $type = 'stamps'): Response
+    {
+        $svg = $this->qrCodeService->generateChildQrCode($child, $type);
+        $url = $this->qrCodeService->generateChildUrl($child, $type);
+        $label = $this->qrCodeService->getQrCodeLabel($type);
+
+        return Inertia::render('Children/SingleQrCode', [
+            'child' => [
+                'id' => $child->id,
+                'name' => $child->name,
+            ],
+            'qrCode' => [
+                'type' => $type,
+                'label' => $label,
+                'svg' => $svg,
+                'url' => $url,
+            ],
+        ]);
+    }
+
+    /**
+     * QRコードデータを取得（JSON API）
+     *
+     * @param Child $child
+     * @param string $type
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getQrCodeData(Child $child, string $type = 'stamps')
+    {
+        $svg = $this->qrCodeService->generateChildQrCode($child, $type);
+        $url = $this->qrCodeService->generateChildUrl($child, $type);
+        $label = $this->qrCodeService->getQrCodeLabel($type);
+
+        return response()->json([
+            'type' => $type,
+            'label' => $label,
+            'svg' => $svg,
+            'url' => $url,
+        ]);
+    }
+
+    /**
+     * QRコードSVGを取得（API）
+     *
+     * @param Child $child
+     * @param string $type
+     * @return HttpResponse
+     */
+    public function getQrCodeSvg(Child $child, string $type = 'stamps'): HttpResponse
+    {
+        $svg = $this->qrCodeService->generateChildQrCode($child, $type);
+
+        return new HttpResponse($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
     }
 }

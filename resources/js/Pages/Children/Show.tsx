@@ -1,8 +1,24 @@
+import React, { useState } from 'react'
 import { Head, Link } from '@inertiajs/react'
 import AppLayout from '../../Layouts/AppLayout'
 import PageHeader from '@/Components/PageHeader'
+import QrCodeModal from '@/Components/QrCodeModal'
 
 export default function Show({ child, children, todayStampsCount, thisMonthStampsCount, childUrls }) {
+    const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [selectedQrCode, setSelectedQrCode] = useState(null);
+
+    const showQrCode = async (type) => {
+        try {
+            const response = await fetch(`/children/${childData.id}/qr-code/${type}/data`);
+            const qrData = await response.json();
+            setSelectedQrCode(qrData);
+            setQrModalOpen(true);
+        } catch (error) {
+            console.error('QRコード取得エラー:', error);
+            alert('QRコードの取得に失敗しました');
+        }
+    };
     const childData = child.data
     return (
         <AppLayout>
@@ -118,13 +134,19 @@ export default function Show({ child, children, todayStampsCount, thisMonthStamp
                                                 type="text" 
                                                 value={childUrls?.stamp_cards || ''} 
                                                 readOnly 
-                                                className="flex-1 px-3 py-2 border border-yellow-300 rounded-l-md bg-white text-sm"
+                                                className="flex-1 px-3 py-2 border border-yellow-300 bg-white text-sm"
                                             />
                                             <button 
                                                 onClick={() => navigator.clipboard.writeText(childUrls?.stamp_cards || '')}
-                                                className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-r-md text-sm"
+                                                className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm"
                                             >
                                                 コピー
+                                            </button>
+                                            <button
+                                                onClick={() => showQrCode('stamp-cards')}
+                                                className="px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-r-md text-sm"
+                                            >
+                                                📱 QR
                                             </button>
                                         </div>
                                     </div>
@@ -138,13 +160,19 @@ export default function Show({ child, children, todayStampsCount, thisMonthStamp
                                                 type="text" 
                                                 value={childUrls?.stamps || ''} 
                                                 readOnly 
-                                                className="flex-1 px-3 py-2 border border-yellow-300 rounded-l-md bg-white text-sm"
+                                                className="flex-1 px-3 py-2 border border-yellow-300 bg-white text-sm"
                                             />
                                             <button 
                                                 onClick={() => navigator.clipboard.writeText(childUrls?.stamps || '')}
-                                                className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-r-md text-sm"
+                                                className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm"
                                             >
                                                 コピー
+                                            </button>
+                                            <button
+                                                onClick={() => showQrCode('stamps')}
+                                                className="px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-r-md text-sm"
+                                            >
+                                                📱 QR
                                             </button>
                                         </div>
                                     </div>
@@ -158,13 +186,19 @@ export default function Show({ child, children, todayStampsCount, thisMonthStamp
                                                 type="text" 
                                                 value={childUrls?.today_stamps || ''} 
                                                 readOnly 
-                                                className="flex-1 px-3 py-2 border border-yellow-300 rounded-l-md bg-white text-sm"
+                                                className="flex-1 px-3 py-2 border border-yellow-300 bg-white text-sm"
                                             />
                                             <button 
                                                 onClick={() => navigator.clipboard.writeText(childUrls?.today_stamps || '')}
-                                                className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-r-md text-sm"
+                                                className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm"
                                             >
                                                 コピー
+                                            </button>
+                                            <button
+                                                onClick={() => showQrCode('today-stamps')}
+                                                className="px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-r-md text-sm"
+                                            >
+                                                📱 QR
                                             </button>
                                         </div>
                                     </div>
@@ -174,6 +208,17 @@ export default function Show({ child, children, todayStampsCount, thisMonthStamp
                     </div>
                 </div>
             </div>
+
+            {/* QRコードモーダル */}
+            <QrCodeModal
+                isOpen={qrModalOpen}
+                onClose={() => setQrModalOpen(false)}
+                child={{
+                    id: childData.id,
+                    name: childData.name
+                }}
+                qrCode={selectedQrCode}
+            />
         </AppLayout>
     )
 }
