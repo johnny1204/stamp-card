@@ -76,7 +76,7 @@ docker compose exec app php artisan migrate:fresh --seed
 
 セットアップ完了後、以下のURLにアクセスできます：
 
-- **アプリケーション**: http://localhost:18080
+- **アプリケーション**: http://localhost:18088
 - **phpMyAdmin**: http://localhost:18081
 - **Vite開発サーバー**: http://localhost:15173
 
@@ -125,7 +125,7 @@ docker compose exec app bash
 
 ### MySQL（マスタデータ）
 - **ホスト**: localhost
-- **ポート**: 13306
+- **ポート**: 13307
 - **データベース**: stamp_master
 - **ユーザー**: stamp_user
 - **パスワード**: stamp_pass
@@ -178,9 +178,9 @@ make setup
 ### ポート競合エラーの場合
 
 以下のポートが使用されていないか確認してください：
-- 18080（アプリケーション）
+- 18088（アプリケーション）
 - 18081（phpMyAdmin）
-- 13306（MySQL）
+- 13307（MySQL）
 - 15173（Vite）
 
 ## 📁 プロジェクト構成
