@@ -195,7 +195,7 @@ const StampCards: React.FC<StampCardsProps> = ({ child, stampCards, isChildView 
                                     </div>
                                 )}
 
-                                <div className="grid grid-cols-5 gap-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
                                     {Array.from({ length: card.target }, (_, index) => {
                                         const stamp = card.stamps[index];
                                         return (
@@ -227,7 +227,8 @@ const StampCards: React.FC<StampCardsProps> = ({ child, stampCards, isChildView 
                                                                         }}
                                                                     />
                                                                 </div>
-                                                                <div className="text-xs text-center text-gray-700 font-medium leading-tight flex-shrink-0">
+                                                                {/* ポケモン名（PCのみ表示） */}
+                                                                <div className="hidden sm:block text-[10px] text-center text-gray-700 font-medium leading-tight flex-shrink-0 px-1">
                                                                     {stamp.pokemon.name}
                                                                 </div>
                                                             </div>

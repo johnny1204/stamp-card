@@ -145,7 +145,7 @@ const Index: React.FC<IndexProps> = ({ child, children, stampCards }) => {
                                         </div>
                                     )}
 
-                                    <div className="grid grid-cols-5 gap-2">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
                                         {Array.from({ length: card.target }, (_, index) => {
                                             const stamp = card.stamps[index];
                                             return (
@@ -158,41 +158,53 @@ const Index: React.FC<IndexProps> = ({ child, children, stampCards }) => {
                                                     }`}
                                                 >
                                                     {stamp ? (
-                                                        <div className="w-full h-full p-1 flex flex-col gap-1">
+                                                        <div className="w-full h-full p-1 sm:p-2 flex flex-col">
                                                             {stamp.opened_at ? (
                                                                 <div className="flex flex-col h-full">
-                                                                    <img
-                                                                        src={getPokemonImageUrlWithCache(stamp.pokemon.id)}
-                                                                        alt={stamp.pokemon.name}
-                                                                        className="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform"
-                                                                        onClick={() => handleStampClick(stamp)}
-                                                                        onError={(e) => {
-                                                                            const pokemon = stamp.pokemon;
-                                                                            if (pokemon && (pokemon.is_legendary || pokemon.is_mythical)) {
-                                                                                e.currentTarget.src = '/images/master-ball.png';
-                                                                            } else {
-                                                                                e.currentTarget.src = '/images/poke-ball.png';
-                                                                            }
-                                                                        }}
-                                                                    />
+                                                                    <div className="flex-1 flex items-center justify-center min-h-0">
+                                                                        <img
+                                                                            src={getPokemonImageUrlWithCache(stamp.pokemon.id)}
+                                                                            alt={stamp.pokemon.name}
+                                                                            className="max-w-full max-h-full object-contain cursor-pointer hover:scale-105 transition-transform"
+                                                                            onClick={() => handleStampClick(stamp)}
+                                                                            onError={(e) => {
+                                                                                const pokemon = stamp.pokemon;
+                                                                                if (pokemon && (pokemon.is_legendary || pokemon.is_mythical)) {
+                                                                                    e.currentTarget.src = '/images/master-ball.png';
+                                                                                } else {
+                                                                                    e.currentTarget.src = '/images/poke-ball.png';
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                    {/* ポケモン名（PCのみ表示） */}
+                                                                    <div className="hidden md:block text-center text-[10px] text-gray-600 leading-tight px-1 flex-shrink-0">
+                                                                        {stamp.pokemon.name}
+                                                                    </div>
                                                                 </div>
                                                             ) : (
-                                                                <div className="relative w-full h-full">
-                                                                    <img
-                                                                        src={getPokemonImageUrlWithCache(stamp.pokemon.id)}
-                                                                        alt={stamp.pokemon.name}
-                                                                        className="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform opacity-60"
-                                                                        onClick={() => handleStampClick(stamp)}
-                                                                        onError={(e) => {
-                                                                            const pokemon = stamp.pokemon;
-                                                                            if (pokemon && (pokemon.is_legendary || pokemon.is_mythical)) {
-                                                                                e.currentTarget.src = '/images/master-ball.png';
-                                                                            } else {
-                                                                                e.currentTarget.src = '/images/poke-ball.png';
-                                                                            }
-                                                                        }}
-                                                                    />
-                                                                    <div className="absolute bottom-1 right-1 bg-red-500 text-white text-xs px-1 rounded">
+                                                                <div className="relative w-full h-full flex flex-col">
+                                                                    <div className="flex-1 flex items-center justify-center min-h-0">
+                                                                        <img
+                                                                            src={getPokemonImageUrlWithCache(stamp.pokemon.id)}
+                                                                            alt={stamp.pokemon.name}
+                                                                            className="max-w-full max-h-full object-contain cursor-pointer hover:scale-105 transition-transform opacity-60"
+                                                                            onClick={() => handleStampClick(stamp)}
+                                                                            onError={(e) => {
+                                                                                const pokemon = stamp.pokemon;
+                                                                                if (pokemon && (pokemon.is_legendary || pokemon.is_mythical)) {
+                                                                                    e.currentTarget.src = '/images/master-ball.png';
+                                                                                } else {
+                                                                                    e.currentTarget.src = '/images/poke-ball.png';
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                    {/* ポケモン名（PCのみ表示） */}
+                                                                    <div className="hidden md:block text-center text-[10px] text-gray-600 leading-tight px-1 flex-shrink-0">
+                                                                        {stamp.pokemon.name}
+                                                                    </div>
+                                                                    <div className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded">
                                                                         未開封
                                                                     </div>
                                                                 </div>
@@ -203,14 +215,11 @@ const Index: React.FC<IndexProps> = ({ child, children, stampCards }) => {
                                                             className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg cursor-pointer hover:from-blue-100 hover:to-purple-100 transition-all duration-200 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-blue-400"
                                                             onClick={handleCreateStamp}
                                                         >
-                                                            <div className="text-2xl text-gray-400 hover:text-blue-500 transition-colors">
+                                                            <div className="text-3xl sm:text-2xl text-gray-400 hover:text-blue-500 transition-colors">
                                                                 ➕
                                                             </div>
-                                                            <div className="text-xs text-gray-500 font-medium mt-1">
-                                                                タップで
-                                                            </div>
-                                                            <div className="text-xs text-gray-500 font-medium">
-                                                                スタンプ
+                                                            <div className="text-[10px] sm:text-xs text-gray-500 font-medium mt-1 text-center hidden sm:block">
+                                                                タップで<br />スタンプ
                                                             </div>
                                                         </div>
                                                     )}

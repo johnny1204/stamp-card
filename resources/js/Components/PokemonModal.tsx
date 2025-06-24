@@ -35,10 +35,10 @@ const PokemonModal: React.FC<PokemonModalProps> = ({ isOpen, pokemon, childName,
     const animationRef = useRef<number>();
     const [confetti, setConfetti] = useState<Confetti[]>([]);
     
-    // キャッシュ付きメディア取得
-    const { imageUrl, isImageLoading, loadCry, isCryLoading } = useCachedPokemonMedia(
+    // キャッシュ付きメディア取得（鳴き声も事前読み込み）
+    const { imageUrl, isImageLoading, loadCry, isCryLoading, cryUrl } = useCachedPokemonMedia(
         pokemon?.id || null, 
-        false // 鳴き声は必要な時に遅延読み込み
+        true // 鳴き声も事前に読み込む（MP3ファイルなので高速）
     );
 
     // 紙吹雪を生成する関数
@@ -97,15 +97,8 @@ const PokemonModal: React.FC<PokemonModalProps> = ({ isOpen, pokemon, childName,
                     }, 300);
                 }
                 
-                // 音声の読み込み（自動再生は無効化、手動再生のみ）
-                loadCry().then(cryUrl => {
-                    if (audioRef.current) {
-                        audioRef.current.src = cryUrl;
-                        audioRef.current.load();
-                    }
-                }).catch(error => {
-                    console.error('鳴き声の読み込みに失敗:', error);
-                });
+                // 鳴き声の自動読み込みと再生は別のuseEffectで処理
+                // ここでは紙吹雪のみ
             }, 100); // 100ms後に重い処理を開始
             
             return () => {
@@ -120,6 +113,30 @@ const PokemonModal: React.FC<PokemonModalProps> = ({ isOpen, pokemon, childName,
             }
         }
     }, [isOpen, pokemon]);
+
+    // 鳴き声URLが取得されたら自動再生を試行
+    useEffect(() => {
+        if (isOpen && cryUrl && audioRef.current) {
+            const audio = audioRef.current;
+            audio.src = cryUrl;
+            audio.load();
+            
+            const playAudio = () => {
+                audio.play().catch(() => {
+                    // 自動再生失敗は無視（手動再生ボタンで再生可能）
+                });
+            };
+            
+            // 少し遅延させてから再生を試行
+            setTimeout(() => {
+                if (audio.readyState >= 3) {
+                    playAudio();
+                } else {
+                    audio.addEventListener('canplaythrough', playAudio, { once: true });
+                }
+            }, 200);
+        }
+    }, [isOpen, cryUrl]);
 
     useEffect(() => {
         // ESCキーでモーダルを閉じる（最優先で設定）
@@ -327,23 +344,14 @@ const PokemonModal: React.FC<PokemonModalProps> = ({ isOpen, pokemon, childName,
                                 
                                 if (audioRef.current) {
                                     try {
-                                        // ブラウザの音声形式サポートをチェック
-                                        const audio = audioRef.current;
-                                        const canPlayOgg = audio.canPlayType('audio/ogg') !== '';
-                                        console.log('ブラウザサポート状況:', {
-                                            canPlayOgg: canPlayOgg,
-                                            canPlayMp3: audio.canPlayType('audio/mpeg') !== '',
-                                            canPlayWav: audio.canPlayType('audio/wav') !== '',
-                                            userAgent: navigator.userAgent
-                                        });
-                                        
                                         // 音声を停止してリセット
+                                        const audio = audioRef.current;
                                         audio.pause();
                                         audio.currentTime = 0;
                                         
-                                        // 鳴き声URLを取得
-                                        const cryUrl = await loadCry();
-                                        audio.src = cryUrl;
+                                        // 事前読み込み済みのcryUrlを使用、なければloadCryで取得
+                                        const finalCryUrl = cryUrl || await loadCry();
+                                        audio.src = finalCryUrl;
                                         
                                         // 音声を再読み込み
                                         audio.load();
