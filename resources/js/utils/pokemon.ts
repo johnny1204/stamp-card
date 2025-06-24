@@ -19,7 +19,8 @@ export const getPokemonImageUrl = (pokemonId: number): string => {
  * @returns 鳴き声URL
  */
 export const getPokemonCryUrl = (pokemonId: number): string => {
-    return `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemonId}.ogg`;
+    // storage内のMP3ファイルを参照
+    return `/storage/pokemon_cache/cries/${pokemonId}.mp3`;
 };
 
 /**

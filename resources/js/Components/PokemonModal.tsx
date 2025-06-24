@@ -327,28 +327,69 @@ const PokemonModal: React.FC<PokemonModalProps> = ({ isOpen, pokemon, childName,
                                 
                                 if (audioRef.current) {
                                     try {
+                                        // ブラウザの音声形式サポートをチェック
+                                        const audio = audioRef.current;
+                                        const canPlayOgg = audio.canPlayType('audio/ogg') !== '';
+                                        console.log('ブラウザサポート状況:', {
+                                            canPlayOgg: canPlayOgg,
+                                            canPlayMp3: audio.canPlayType('audio/mpeg') !== '',
+                                            canPlayWav: audio.canPlayType('audio/wav') !== '',
+                                            userAgent: navigator.userAgent
+                                        });
+                                        
                                         // 音声を停止してリセット
-                                        audioRef.current.pause();
-                                        audioRef.current.currentTime = 0;
+                                        audio.pause();
+                                        audio.currentTime = 0;
                                         
                                         // 鳴き声URLを取得
                                         const cryUrl = await loadCry();
-                                        audioRef.current.src = cryUrl;
+                                        audio.src = cryUrl;
                                         
                                         // 音声を再読み込み
-                                        audioRef.current.load();
+                                        audio.load();
                                         
-                                        // 少し待ってから再生（スマホでの再生成功率向上）
-                                        setTimeout(async () => {
-                                            try {
-                                                await audioRef.current?.play();
-                                                console.log('鳴き声再生成功');
-                                            } catch (playError) {
-                                                console.error('鳴き声再生エラー:', playError);
-                                                // スマホで再生できない場合はアラートで通知
-                                                alert('音声の再生に失敗しました。ブラウザの設定で音声が有効になっているか確認してください。');
-                                            }
-                                        }, 100);
+                                        // 音声が読み込まれるまで待機してから再生
+                                        const playWhenReady = () => {
+                                            console.log('音声ファイルURL:', cryUrl);
+                                            console.log('Audio要素の状態:', {
+                                                src: audio.src,
+                                                readyState: audio.readyState,
+                                                duration: audio.duration,
+                                                networkState: audio.networkState
+                                            });
+                                            
+                                            audio.play()
+                                                .then(() => {
+                                                    console.log('鳴き声再生成功');
+                                                })
+                                                .catch((playError) => {
+                                                    console.error('鳴き声再生エラー詳細:', {
+                                                        error: playError,
+                                                        audioSrc: audio.src,
+                                                        audioReadyState: audio.readyState,
+                                                        audioNetworkState: audio.networkState
+                                                    });
+                                                    
+                                                    // より詳細なエラーメッセージ
+                                                    const errorMsg = playError instanceof Error ? playError.message : String(playError);
+                                                    alert(`音声の再生に失敗しました。\nエラー: ${errorMsg}\n音声URL: ${cryUrl}`);
+                                                });
+                                        };
+                                        
+                                        // 音声が準備できたら再生
+                                        if (audio.readyState >= 3) { // HAVE_FUTURE_DATA以上
+                                            playWhenReady();
+                                        } else {
+                                            audio.addEventListener('canplaythrough', playWhenReady, { once: true });
+                                            
+                                            // 5秒でタイムアウト
+                                            setTimeout(() => {
+                                                audio.removeEventListener('canplaythrough', playWhenReady);
+                                                if (audio.readyState < 3) {
+                                                    alert('音声ファイルの読み込みがタイムアウトしました。ネットワーク接続を確認してください。');
+                                                }
+                                            }, 5000);
+                                        }
                                         
                                     } catch (error) {
                                         console.error('鳴き声読み込みエラー:', error);

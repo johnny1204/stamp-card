@@ -57,35 +57,17 @@ class PokemonCacheService
      */
     public function getCachedPokemonCry(int $pokemonId): string
     {
-        $filename = "{$pokemonId}.ogg";
-        $cachePath = self::CRY_CACHE_DIR . '/' . $filename;
+        $mp3Filename = "{$pokemonId}.mp3";
+        $mp3CachePath = self::CRY_CACHE_DIR . '/' . $mp3Filename;
         
-        // キャッシュが存在し、期限内かチェック
-        if ($this->isCacheValid($cachePath)) {
-            return $this->getCachedFileUrl($cachePath);
+        // MP3ファイルが存在するかチェック
+        if (Storage::disk(self::DISK)->exists($mp3CachePath)) {
+            return $this->getCachedFileUrl($mp3CachePath);
         }
         
-        // 外部から取得してキャッシュ
-        $cryUrl = "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/{$pokemonId}.ogg";
-        
-        try {
-            $response = Http::timeout(30)->get($cryUrl);
-            
-            if ($response->successful()) {
-                // ファイルをキャッシュディレクトリに保存
-                Storage::disk(self::DISK)->put($cachePath, $response->body());
-                Log::info("ポケモン鳴き声をキャッシュしました: Pokemon ID {$pokemonId}");
-                
-                return $this->getCachedFileUrl($cachePath);
-            }
-        } catch (\Exception $e) {
-            Log::error("ポケモン鳴き声の取得に失敗: Pokemon ID {$pokemonId}", [
-                'error' => $e->getMessage()
-            ]);
-        }
-        
-        // 取得に失敗した場合は元のURLを返す
-        return $cryUrl;
+        // MP3ファイルが存在しない場合は外部OGGファイルにフォールバック
+        Log::warning("MP3ファイルが見つかりません: Pokemon ID {$pokemonId}");
+        return "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/{$pokemonId}.ogg";
     }
     
     /**
