@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Child;
+use App\Models\Pokemon;
 use App\Models\Stamp;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -25,14 +26,18 @@ class StatisticsService extends BaseService
         $thisMonthStamps = $child->stamps()->thisMonth()->count();
         $thisYearStamps = $child->stamps()->whereYear('stamped_at', Carbon::now()->year)->count();
 
-        // レアポケモン統計
-        $legendaryCount = $child->stamps()->whereHas('pokemon', function ($query) {
-            $query->where('is_legendary', true);
-        })->count();
-
-        $mythicalCount = $child->stamps()->whereHas('pokemon', function ($query) {
-            $query->where('is_mythical', true);
-        })->count();
+        // レアポケモン統計（異なるDB間のリレーション対応）
+        $pokemonIds = $child->stamps()->pluck('pokemon_id')->unique();
+        
+        $legendaryPokemons = Pokemon::whereIn('id', $pokemonIds)
+            ->where('is_legendary', true)
+            ->pluck('id');
+        $legendaryCount = $child->stamps()->whereIn('pokemon_id', $legendaryPokemons)->count();
+        
+        $mythicalPokemons = Pokemon::whereIn('id', $pokemonIds)
+            ->where('is_mythical', true)
+            ->pluck('id');
+        $mythicalCount = $child->stamps()->whereIn('pokemon_id', $mythicalPokemons)->count();
 
         return [
             'total_stamps' => $totalStamps,

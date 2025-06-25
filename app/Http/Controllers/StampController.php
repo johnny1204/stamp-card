@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateStampRequest;
 use App\Http\Resources\StampResource;
 use App\Models\Child;
+use App\Models\StampType;
 use App\Services\StampService;
 use App\Services\PokemonSelectionService;
 use App\Services\ChildService;
@@ -50,10 +51,12 @@ class StampController extends Controller
     public function create(Child $child): Response
     {
         $children = $this->childService->getAllChildren();
+        $stampTypes = StampType::orderBy('name')->get(['id', 'name', 'icon', 'color', 'category']);
 
         return Inertia::render('Stamps/Create', [
             'child' => $child,
             'children' => $children,
+            'stampTypes' => $stampTypes,
         ]);
     }
 

@@ -25,6 +25,7 @@ class CreateStampRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'stamp_type_id' => ['required', 'integer', 'exists:stamp_types,id'],
             'comment' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -37,6 +38,9 @@ class CreateStampRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'stamp_type_id.required' => 'スタンプの種類を選択してください。',
+            'stamp_type_id.integer' => 'スタンプの種類が正しくありません。',
+            'stamp_type_id.exists' => '選択されたスタンプの種類は存在しません。',
             'comment.string' => 'コメントは文字列で入力してください。',
             'comment.max' => 'コメントは500文字以内で入力してください。',
         ];

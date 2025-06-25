@@ -50,12 +50,9 @@ class StampService extends BaseService
                 $pokemon = $this->pokemonSelectionService->selectRandomPokemon();
             }
 
-            // For simplicity, we'll use the first stamp type for now
-            $stampType = \App\Models\StampType::first();
-            
             $stamp = Stamp::create([
                 'child_id' => $child->id,
-                'stamp_type_id' => $stampType->id,
+                'stamp_type_id' => $data['stamp_type_id'],
                 'pokemon_id' => $pokemon->id,
                 'stamped_at' => now(),
                 'comment' => $data['comment'] ?? null,

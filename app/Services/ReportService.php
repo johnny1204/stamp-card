@@ -122,7 +122,7 @@ class ReportService
     }
 
     /**
-     * スタンプタイプ別の統計を取得
+     * スタンプタイプ別の統計を取得（異なるDB間のリレーション対応）
      *
      * @param int $childId 子どもID
      * @param array<string, mixed> $options オプション
@@ -130,20 +130,33 @@ class ReportService
      */
     private function getStampsByType(int $childId, array $options): Collection
     {
-        return Stamp::where('child_id', $childId)
-                   ->whereBetween('stamped_at', [$options['start_date'], $options['end_date']])
-                   ->join('stamp_types', 'stamps.stamp_type_id', '=', 'stamp_types.id')
-                   ->select([
-                       'stamp_types.id',
-                       'stamp_types.name',
-                       'stamp_types.icon',
-                       'stamp_types.color',
-                       DB::raw('COUNT(*) as count'),
-                       DB::raw('AVG(CASE WHEN stamps.opened_at IS NOT NULL THEN 1 ELSE 0 END) * 100 as open_rate')
-                   ])
-                   ->groupBy('stamp_types.id', 'stamp_types.name', 'stamp_types.icon', 'stamp_types.color')
-                   ->orderBy('count', 'desc')
-                   ->get();
+        // SQLiteからスタンプデータを取得
+        $stamps = Stamp::where('child_id', $childId)
+                      ->whereBetween('stamped_at', [$options['start_date'], $options['end_date']])
+                      ->get();
+        
+        // スタンプタイプIDでグループ化
+        $stampsByType = $stamps->groupBy('stamp_type_id');
+        
+        // MySQLからスタンプタイプ情報を取得
+        $stampTypeIds = $stampsByType->keys();
+        $stampTypes = StampType::whereIn('id', $stampTypeIds)->get()->keyBy('id');
+        
+        // 統計データを作成
+        return $stampsByType->map(function ($stampGroup, $typeId) use ($stampTypes) {
+            $stampType = $stampTypes->get($typeId);
+            $openedCount = $stampGroup->filter(fn($stamp) => $stamp->opened_at !== null)->count();
+            $totalCount = $stampGroup->count();
+            
+            return (object) [
+                'id' => $typeId,
+                'name' => $stampType->name ?? '不明',
+                'icon' => $stampType->icon ?? '',
+                'color' => $stampType->color ?? '#000000',
+                'count' => $totalCount,
+                'open_rate' => $totalCount > 0 ? round(($openedCount / $totalCount) * 100, 1) : 0
+            ];
+        })->sortByDesc('count')->values();
     }
 
     /**
