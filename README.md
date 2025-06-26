@@ -2,27 +2,29 @@
 
 子どもの日常行動や達成事項にスタンプを押して記録・評価するデジタルスタンプ帳システムです。
 
+[](./stamp.gif)
+
 ## ✨ 特徴
 
-- 🎯 子どもの行動にスタンプを付与
-- 🎉 スタンプ獲得時のポケモンお祝いモーダル
-- 📊 成長記録とレポート機能
-- 👪 複数の子どもに対応
-- 📱 レスポンシブデザイン（スマホ・タブレット対応）
+-   🎯 子どもの行動にスタンプを付与
+-   🎉 スタンプ獲得時のポケモンお祝いモーダル
+-   📊 成長記録とレポート機能
+-   👪 複数の子どもに対応
+-   📱 レスポンシブデザイン（スマホ・タブレット対応）
 
 ## 🛠 技術構成
 
-- **フロントエンド**: React + Vite + Tailwind CSS v4
-- **バックエンド**: PHP 8.4 + Laravel 12+
-- **統合**: Inertia.js
-- **データベース**: MySQL 8（マスタ） + SQLite（記録）
-- **開発環境**: Docker
+-   **フロントエンド**: React + Vite + Tailwind CSS v4
+-   **バックエンド**: PHP 8.4 + Laravel 12+
+-   **統合**: Inertia.js
+-   **データベース**: MySQL 8（マスタ） + SQLite（記録）
+-   **開発環境**: Docker
 
 ## 📋 必要な環境
 
-- Docker
-- Docker Compose
-- Make（オプション）
+-   Docker
+-   Docker Compose
+-   Make（オプション）
 
 ## 🚀 ローカル環境構築
 
@@ -44,6 +46,7 @@ cp .env.example .env
 **ネットワーク内他端末からアクセスする場合の追加設定：**
 
 `.env`ファイルで以下を設定：
+
 ```env
 # サーバーのIPアドレスに変更（例：192.168.1.100）
 APP_URL=http://[サーバーIP]:18088
@@ -52,9 +55,9 @@ APP_URL=http://[サーバーIP]:18088
 VITE_HMR_HOST=[サーバーIP]
 ```
 
-### 3. Docker環境の起動
+### 3. Docker 環境の起動
 
-#### Makeコマンドを使用する場合（推奨）
+#### Make コマンドを使用する場合（推奨）
 
 ```bash
 # 初回セットアップ（自動で以下を実行します）
@@ -85,16 +88,16 @@ docker compose exec app php artisan migrate:fresh --seed
 
 ### 4. アクセス確認
 
-セットアップ完了後、以下のURLにアクセスできます：
+セットアップ完了後、以下の URL にアクセスできます：
 
-- **アプリケーション**: http://localhost:18088
-- **ネットワーク内他端末から**: http://[サーバーIP]:18088
-- **phpMyAdmin**: http://localhost:18081
-- **Vite開発サーバー**: http://localhost:15173
+-   **アプリケーション**: http://localhost:18088
+-   **ネットワーク内他端末から**: http://[サーバー IP]:18088
+-   **phpMyAdmin**: http://localhost:18081
+-   **Vite 開発サーバー**: http://localhost:15173
 
 ## 🔧 開発用コマンド
 
-### Makeコマンド一覧
+### Make コマンド一覧
 
 ```bash
 # コンテナ操作
@@ -120,7 +123,7 @@ make typecheck   # TypeScript型チェック
 make help        # 利用可能なコマンド一覧表示
 ```
 
-### 直接Dockerコマンドを使用する場合
+### 直接 Docker コマンドを使用する場合
 
 ```bash
 # フロントエンド開発サーバー起動
@@ -136,14 +139,16 @@ docker compose exec app bash
 ## 🗄️ データベース接続情報
 
 ### MySQL（マスタデータ）
-- **ホスト**: localhost
-- **ポート**: 13307
-- **データベース**: stamp_master
-- **ユーザー**: stamp_user
-- **パスワード**: stamp_pass
+
+-   **ホスト**: localhost
+-   **ポート**: 13307
+-   **データベース**: stamp_master
+-   **ユーザー**: stamp_user
+-   **パスワード**: stamp_pass
 
 ### SQLite（スタンプ記録）
-- **ファイル**: `storage/database/database.sqlite`
+
+-   **ファイル**: `storage/database/database.sqlite`
 
 ## 🧪 テスト
 
@@ -170,9 +175,9 @@ docker compose exec app php artisan test --testsuite=Feature
 make clean-db
 ```
 
-### npmコマンドでエラーが発生した場合
+### npm コマンドでエラーが発生した場合
 
-npmコマンドは`node`コンテナで実行してください：
+npm コマンドは`node`コンテナで実行してください：
 
 ```bash
 docker compose exec node npm install
@@ -190,16 +195,17 @@ make setup
 ### ポート競合エラーの場合
 
 以下のポートが使用されていないか確認してください：
-- 18088（アプリケーション）
-- 18081（phpMyAdmin）
-- 13307（MySQL）
-- 15173（Vite）
+
+-   18088（アプリケーション）
+-   18081（phpMyAdmin）
+-   13307（MySQL）
+-   15173（Vite）
 
 ### ネットワーク内他端末からアクセスできない場合
 
 1. サーバーのファイアウォール設定を確認
-2. ポート18088が開いているか確認
-3. サーバーのIPアドレスを確認：`ip addr show` または `ifconfig`
+2. ポート 18088 が開いているか確認
+3. サーバーの IP アドレスを確認：`ip addr show` または `ifconfig`
 
 ## 📁 プロジェクト構成
 
@@ -220,4 +226,3 @@ stamp/
 ├── Makefile             # 開発コマンド
 └── docker-compose.yml   # Docker Compose 設定
 ```
-
