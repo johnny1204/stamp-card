@@ -2,7 +2,7 @@
 
 子どもの日常行動や達成事項にスタンプを押して記録・評価するデジタルスタンプ帳システムです。
 
-[](./stamp.gif)
+![image](https://github.com/johnny1204/stamp-card/blob/main/stamp.gif)
 
 ## ✨ 特徴
 
